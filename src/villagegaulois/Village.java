@@ -9,10 +9,13 @@ public class Village {
 	private Gaulois[] villageois;
 	private int nbVillageois = 0;
 	private Marche marche;
+	private Etal[] etals;
+	
 
-	public Village(String nom, int nbVillageoisMaximum) {
+	public Village(String nom, int nbVillageoisMaximum, int nbEtals) {
 		this.nom = nom;
 		villageois = new Gaulois[nbVillageoisMaximum];
+		this.marche = new Marche(nbEtals);
 	}
 
 	public String getNom() {
@@ -58,11 +61,76 @@ public class Village {
 		return chaine.toString();
 	}
 	
-	private static class Marche{
+	public String installerVendeur(Gaulois vendeur, String produit, int nbProduit) {
+		StringBuilder chaine = new StringBuilder();
+		int idx = marche.trouverEtalLibre();
+
+	    if (idx != -1) {
+	        marche.utiliserEtal(idx, vendeur, produit, nbProduit); // il te faut un getter ou une méthode pour occuper l'étal
+	        chaine.append(vendeur.getNom())
+	          .append(" vend ")
+	          .append(nbProduit)
+	          .append(" ")
+	          .append(produit)
+	          .append(".\n");
+	    } else {
+	        chaine.append("Aucun étal libre pour ").append(vendeur.getNom()).append(".\n");
+	    }
+		return chaine.toString();
+	}
+	
+	public String rechercherVendeursProduit(String produit) {
+		StringBuilder chaine = new StringBuilder();
+	    Etal[] etalsProduit = marche.trouverEtals(produit);
+
+	    if (etalsProduit.length == 0) {
+	        chaine.append("Il n'y a pas de vendeur qui propose "+ produit + " au marché.\n");
+
+	    } else if (etalsProduit.length == 1){
+	    	chaine.append("Seul le vendeur "+ etalsProduit[0].getVendeur().getNom()+" propose des"+produit+" au marché.\n");
+	    } else {
+	        chaine.append("Les vendeurs qui proposent des "+produit+" sont :\n");
+	        for (int i = 0; i < etalsProduit.length; i++) {
+	            Etal etal = etalsProduit[i]; 
+	            if (etal != null && etal.isEtalOccupe()) {
+	            chaine.append("- " + etalsProduit[i].getVendeur().getNom()+"\n");
+	        }
+	        }
+	    }
+		return chaine.toString();
+	}
+
+	    
+	public Etal rechercherEtal(Gaulois vendeur) {
+		return marche.trouverVendeur(vendeur);
+	}
+	
+	public String partirVendeur(Gaulois vendeur) {
+		StringBuilder affichage = new StringBuilder();
+	    Etal etal = marche.trouverVendeur(vendeur);
+
+	    if (etal != null) {
+	        affichage.append(etal.libererEtal());
+	    } else {
+	        affichage.append(vendeur.getNom())
+	                 .append(" n'est pas installé au marché.\n");
+	    }
+
+	    return affichage.toString();
+	}
+	
+	public String afficherMarche() {
+		return marche.afficherMarche();
+	}
+	
+	private class Marche{
 		private Etal[] etals;
 		
 		public Marche(int nbEtals) {
 			etals = new Etal[nbEtals];
+			for (int i = 0; i < nbEtals; i++) {
+		        etals[i] = new Etal(); 
+		    }
 		}
 		
 		void utiliserEtal(int indiceEtal, Gaulois vendeur, String produit, int nbProduit) {
@@ -71,7 +139,7 @@ public class Village {
 		
 		int trouverEtalLibre() {
 			for (int i=0; i<etals.length; i++) {
-				if (etals[i].isEtalOccupe() ) {
+				if (etals[i] != null && !etals[i].isEtalOccupe()){
 					return i;
 				} 	
 			}
@@ -97,7 +165,41 @@ public class Village {
 		}
 		
 		Etal trouverVendeur(Gaulois gaulois) {
-			
+			if (gaulois == null) {
+		        return null;
+		    }
+			for (int i = 0; i<etals.length; i++) {
+		        Etal etal = etals[i]; // pas obligatoire mais mieux
+		        if (etal != null && etal.isEtalOccupe()) {
+		            if (etal.getVendeur() != null && 
+		                etal.getVendeur().getNom().equals(gaulois.getNom())) {
+		                return etal;
+		            }
+		        }
+		    }
+		    return null;
+		}
+		
+		public String afficherMarche() {
+			String affichage = "";
+		    int nbEtalsLibres = 0;
+		    
+		    for (int i = 0; i < etals.length; i++) {
+		        Etal etal = etals[i];
+		    
+		        if (etal != null && etal.isEtalOccupe()) {
+		            affichage += etal.afficherEtal() + "\n";
+		        } else {
+		            nbEtalsLibres++;
+		        }
+		    }
+
+		    if (nbEtalsLibres > 0) {
+		        affichage += "Il reste " + nbEtalsLibres 
+		                   + " étals non utilisés dans le marché.\n";
+		    }
+
+		    return affichage;
 		}
 	}
 }

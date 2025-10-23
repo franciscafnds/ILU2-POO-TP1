@@ -32,7 +32,7 @@ public class Etal {
 		int produitVendu = quantiteDebutMarche - quantite;
 		if (produitVendu > 0) {
 			chaine.append(
-					"il a vendu " + produitVendu + " parmi " + produit + ".\n");
+					"il a vendu " +produitVendu +" "+ produit + " parmi les " + quantiteDebutMarche + " qu'il voulait vendre.\n");
 		} else {
 			chaine.append("il n'a malheureusement rien vendu.\n");
 		}
@@ -41,19 +41,18 @@ public class Etal {
 
 	public String afficherEtal() {
 		if (etalOccupe) {
-			return "L'étal de " + vendeur.getNom() + " est garni de " + quantite
+			return vendeur.getNom() + " vend " + quantite
 					+ " " + produit + "\n";
 		}
 		return "L'étal est libre";
 	}
 
 	public String acheterProduit(int quantiteAcheter, Gaulois acheteur) {
-		if (etalOccupe) {
 			StringBuilder chaine = new StringBuilder();
 			chaine.append(acheteur.getNom() + " veut acheter " + quantiteAcheter
 					+ " " + produit + " à " + vendeur.getNom());
 			if (quantite == 0) {
-				chaine.append(", malheureusement il n'y en a plus !");
+				chaine.append(", malheureusement il n'y en a plus !\n");
 				quantiteAcheter = 0;
 			}
 			if (quantiteAcheter > quantite) {
@@ -70,8 +69,6 @@ public class Etal {
 						+ vendeur.getNom() + "\n");
 			}
 			return chaine.toString();
-		}
-		return null;
 	}
 
 	public boolean contientProduit(String produit) {
